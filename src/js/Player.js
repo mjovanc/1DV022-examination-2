@@ -2,18 +2,18 @@ import * as Time from './Time.js'
 
 const inputTemplate = document.createElement('template')
 inputTemplate.innerHTML = `
-<form id="nickname-input">
-<input type="text">
+<form>
+<input name="nickname" type="text">
 <input type="submit">
 </form>
 `
 
-class Player extends HTMLElement {
-  constructor (nickname) {
+class Player extends window.HTMLElement {
+  constructor () {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(inputTemplate.content.cloneNode(true))
-    this.nickname = nickname
+    this.nickname = ''
     this.totalTime = 0
   }
 
@@ -22,8 +22,8 @@ class Player extends HTMLElement {
   }
 
   _submitNickname (event) {
-    console.log(event.type)
-    debugger
+    this.nickname = event.target.nickname.value
+    console.log(event.target.nickname.value)
   }
 
   // updateTotalTime () {}
