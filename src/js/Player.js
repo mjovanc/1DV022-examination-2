@@ -1,4 +1,6 @@
-function Player (nickname) {
-  this.nickname = nickname
-  this.totalTime = 0
+class Player {
+  constructor (nickname) {
+    this.nickname = nickname
+    this.totalTime = 0
+  }
 }
