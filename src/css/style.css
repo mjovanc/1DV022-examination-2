@@ -3695,6 +3695,10 @@ a.text-error:visited {
 
 /* CUSTOM STYLING */
 
+#quiz-container {
+  margin: 100px auto;
+}
+
 .div-border-bottom {
   border-bottom: 1px solid #eee;
 }

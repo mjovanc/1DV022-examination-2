@@ -1,7 +1,6 @@
 import * as Quiz from './Quiz.js'
 
-let config = {
-  startUrl: 'http://vhost3.lnu.se:20080/question/1'
-}
+window.customElements.define('quiz-form', Quiz)
 
-let quiz = Quiz(config)
+let quiz = document.createElement('quiz-form')
+document.querySelector('#quiz-container').appendChild(quiz)

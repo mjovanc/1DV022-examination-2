@@ -1,3 +1,5 @@
+import * as Time from './Time.js'
+
 class Player {
   constructor (nickname) {
     this.nickname = nickname
