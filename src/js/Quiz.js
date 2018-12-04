@@ -24,10 +24,10 @@ export class Quiz extends window.HTMLElement {
     this._players = {} // player objects 
     this._highScores = {}
   }
-
-  // enterNickname () {}
-
+  
   // getQuestions () {}
 
   // highScores () {}
 }
+
+window.customElements.define('quiz-form', Quiz)
