@@ -3,4 +3,6 @@ class Player {
     this.nickname = nickname
     this.totalTime = 0
   }
+
+  // updateTotalTime () {}
 }
