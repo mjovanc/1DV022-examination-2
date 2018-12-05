@@ -23,21 +23,27 @@ export class Quiz extends window.HTMLElement {
     this._questionForm = this.shadowRoot.querySelector('#question')
     this._nicknameForm = this.shadowRoot.querySelector('#nickname')
     this._config = {
-      questionUrl: 'http://vhost3.lnu.se:20080/question',
+      questionID: 1,
+      questionURL: 'http://vhost3.lnu.se:20080/question',
       answerUrl: 'http://vhost3.lnu.se:20080/answer'
     }
     this._nickname = ''
   }
 
   connectedCallback () {
+    let q = this.getQuestion(this._config.questionID)
+    console.log(q)
+    
     this._nicknameForm.addEventListener('submit', (event) => {
       event.preventDefault() // removing /q=blabla in the url
       this.nickname = event.target.nickname.value
       event.target.hidden = true
     })
+    
     this._questionForm.addEventListener('submit', (event) => {
       event.preventDefault()
-      return this.getQuestion(1)
+      this.sendAnswer(this._config.questionID, event.target.answer.value)
+      return
     })
   }
 
@@ -46,29 +52,34 @@ export class Quiz extends window.HTMLElement {
   }
 
   async getQuestion (id) {
-    let questionResult = await window.fetch(`${this._config.questionUrl}/${id}`)
+    let questionResult = await window.fetch(`${this._config.questionURL}/${id}`)
     return questionResult.json()
-    // console.log(qResults.json())
-    // this.sendAnswer(1, 2) // 1 is id and 2 the answer of the question id 1
-    // we send the answer here
   }
 
   async sendAnswer (id, answer) {
-    let postReq = await window.fetch(`${this._config.answerUrl}/${id}`, {
+    let config = this._config
+
+    let postReq = await window.fetch(`${config.answerUrl}/${id}`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        answer: answer, // sending serializing answer with post request
-      })
-    }).then( (response) => { 
-      console.log('woohoo!')
-      // we should add the new question id url to questionUrl here
+      body: JSON.stringify({ answer: answer })
+    }).then((response) => {
+      if (response.ok) {
+        response.json().then(function(data) {
+          let nextURL = data.nextURL
+          // we retrieve response object and pass the new questionURL and questionID to config object
+          config.questionURL = nextURL
+          config.questionID = nextURL.substring(nextURL.lastIndexOf('/') + 1)
+        })
+      } else {
+        console.error('Something went wrong!')
+      }
    })
   }
-  
+
 }
 
 window.customElements.define('quiz-form', Quiz)
