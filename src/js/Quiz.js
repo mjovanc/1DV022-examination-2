@@ -9,6 +9,7 @@ template.innerHTML = `
 </form>
 
 <form id="question" class="form-group">
+  <h3></h3>
   <label class="form-label" for="input-example-1">Answer</label>
   <input class="form-input" name="answer" type="text" placeholder="Answer">
   <input type="submit">
@@ -30,17 +31,18 @@ export class Quiz extends window.HTMLElement {
     this._nickname = ''
   }
 
-  connectedCallback () {
-    let q = this.getQuestion(this._config.questionID)
-    console.log(q)
-    
-    this._nicknameForm.addEventListener('submit', (event) => {
+  connectedCallback () {    
+    let currentQuestion = this._getQuestion(this._config.questionID)
+    this._addQuestion(currentQuestion)
+    // this._addAnswer(currentQuestion)
+
+    this._nicknameForm.addEventListener('submit', async event => {
       event.preventDefault() // removing /q=blabla in the url
       this.nickname = event.target.nickname.value
       event.target.hidden = true
     })
     
-    this._questionForm.addEventListener('submit', (event) => {
+    this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
       this.sendAnswer(this._config.questionID, event.target.answer.value)
       return
@@ -51,7 +53,15 @@ export class Quiz extends window.HTMLElement {
     // lägg till alla här sen
   }
 
-  async getQuestion (id) {
+  _addQuestion (question) {
+    let questionForm = this._questionForm
+    question.then(function (q) {
+      // Changing the question title
+      questionForm.firstElementChild.textContent = q.question
+   })
+  }
+
+  async _getQuestion (id) {
     let questionResult = await window.fetch(`${this._config.questionURL}/${id}`)
     return questionResult.json()
   }
@@ -62,7 +72,7 @@ export class Quiz extends window.HTMLElement {
     let postReq = await window.fetch(`${config.answerUrl}/${id}`, {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
+        'Accept': 'application/json', // ta bort?
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ answer: answer })
