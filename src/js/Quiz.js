@@ -2,9 +2,12 @@ import * as Time from './Time.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
-<h1 id="question-id" class="text-center""></h1>
-<p id="question-text" class="text-center text-large""></p>
-<form id="quiz">
+<div id="question">
+  <h1 id="question-id" class="text-center""></h1>
+  <p id="question-text" class="text-center text-large""></p>
+</div>
+
+<form>
   <input name="nickname" type="text">
   <input type="submit">
 </form>
@@ -15,30 +18,40 @@ export class Quiz extends window.HTMLElement {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
-    this._tagName = this.shadowRoot.querySelectorAll('quiz-form')
-    this._form = this._tagName[0]
-    
-    this._input = null
-    // this._config = {
-    //   startUrl: 'http://vhost3.lnu.se:20080/question/1'
-    // }
-    // this._questions = {} // JSON data
+    this._questionDiv = this.shadowRoot.querySelector('#question')
+    this._config = {
+      startUrl: 'http://vhost3.lnu.se:20080/question'
+    }
     this._nickname = ''
-    // this._highScores = {}
   }
 
   connectedCallback () {
     this.shadowRoot.addEventListener('submit', this._submitNickname)
+    this.shadowRoot.addEventListener('submit', (event) => {
+      return this.getQuestions(1)
+    })
+  }
+
+  disconnectedCallback () {
+    this.shadowRoot.removeEventListener('submit', this._submitNickname)
   }
 
   _submitNickname (event) {
     event.preventDefault() // removing /q=blabla in the url
     this.nickname = event.target.nickname.value
+    event.target.hidden = true
+  }
+
+  async getQuestions (id) {
+    let qResults = await window.fetch(`${this._config.startUrl}/${id}`)
+    // return qResults.json()
+    console.log(qResults.json())
+  }
+
+  async sendAnswerToQuestion (id) {
+
   }
   
-  // getQuestions () {}
-
-  // highScores () {}
 }
 
 window.customElements.define('quiz-form', Quiz)
