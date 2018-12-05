@@ -31,7 +31,7 @@ export class Quiz extends window.HTMLElement {
     this._nickname = ''
   }
 
-  connectedCallback () {    
+  connectedCallback () {
     let currentQuestion = this._getQuestion(this._config.questionID)
     this._addQuestion(currentQuestion)
     // this._addAnswer(currentQuestion)
@@ -44,8 +44,8 @@ export class Quiz extends window.HTMLElement {
     
     this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
-      this.sendAnswer(this._config.questionID, event.target.answer.value)
-      return
+      this._addAnswer(this._config.questionID, event.target.answer.value)
+      this._questionForm.firstElementChild.textContent = ''
     })
   }
 
@@ -59,6 +59,10 @@ export class Quiz extends window.HTMLElement {
       // Changing the question title
       questionForm.firstElementChild.textContent = q.question
    })
+  }
+
+  _addAnswer (questionID, answer) {
+    return this.sendAnswer(questionID, answer)
   }
 
   async _getQuestion (id) {
@@ -80,7 +84,7 @@ export class Quiz extends window.HTMLElement {
       if (response.ok) {
         response.json().then(function(data) {
           let nextURL = data.nextURL
-          // we retrieve response object and pass the new questionURL and questionID to config object
+          // we retrieve response object and add the new questionURL and questionID to config object
           config.questionURL = nextURL
           config.questionID = nextURL.substring(nextURL.lastIndexOf('/') + 1)
         })
