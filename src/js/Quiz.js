@@ -12,6 +12,19 @@ template.innerHTML = `
   <h3></h3>
   <label class="form-label" for="input-example-1">Answer</label>
   <input class="form-input" name="answer" type="text" placeholder="Answer">
+  
+  <br/>
+  <br/>
+  
+  <label>Choice</label>
+  <label>
+    <input type="radio" name="alt1" checked>
+    <span>Alternative 1</span>
+  </label>
+  
+  <br/>
+  <br/>
+
   <input type="submit">
 </form>
 `
@@ -22,7 +35,9 @@ export class Quiz extends window.HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this._questionForm = this.shadowRoot.querySelector('#question')
+    this._questionForm.hidden = true
     this._nicknameForm = this.shadowRoot.querySelector('#nickname')
+    // this._questionTitle = this._questionForm.getFirstElementChild.textContent = ''
     this._config = {
       questionID: 1,
       questionURL: 'http://vhost3.lnu.se:20080/question',
@@ -32,25 +47,26 @@ export class Quiz extends window.HTMLElement {
   }
 
   connectedCallback () {
+    // check here if alternatives exists in the question.
     let currentQuestion = this._getQuestion(this._config.questionID)
     this._addQuestion(currentQuestion)
-    // this._addAnswer(currentQuestion)
+
+    this._questionForm.addEventListener('load', () => {
+      this._questionForm.style.visibility = 'hidden'
+    })
 
     this._nicknameForm.addEventListener('submit', async event => {
       event.preventDefault() // removing /q=blabla in the url
       this.nickname = event.target.nickname.value
       event.target.hidden = true
+      this._questionForm.hidden = false
     })
     
     this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
-      this._addAnswer(this._config.questionID, event.target.answer.value)
-      this._questionForm.firstElementChild.textContent = ''
+      this._sendAnswer(this._config.questionID, event.target.answer.value)
+      // this._questionForm.firstElementChild.textContent = ''
     })
-  }
-
-  disconnectedCallback () {
-    // lägg till alla här sen
   }
 
   _addQuestion (question) {
@@ -58,11 +74,7 @@ export class Quiz extends window.HTMLElement {
     question.then(function (q) {
       // Changing the question title
       questionForm.firstElementChild.textContent = q.question
-   })
-  }
-
-  _addAnswer (questionID, answer) {
-    return this.sendAnswer(questionID, answer)
+    })
   }
 
   async _getQuestion (id) {
@@ -70,7 +82,7 @@ export class Quiz extends window.HTMLElement {
     return questionResult.json()
   }
 
-  async sendAnswer (id, answer) {
+  async _sendAnswer (id, answer) {
     let config = this._config
 
     let postReq = await window.fetch(`${config.answerUrl}/${id}`, {
