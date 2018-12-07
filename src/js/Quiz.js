@@ -54,6 +54,7 @@ export class Quiz extends window.HTMLElement {
     .then((data) => {
       this.questionForm.firstElementChild.textContent = data.question
       // ska rensa input fälten här, skapas ändå nedan.
+      let radioButtons = this._fieldset.querySelectorAll('[type="radio"]')
 
       if (data.alternatives) {
         // få fram radio knappar i templaten
@@ -65,18 +66,44 @@ export class Quiz extends window.HTMLElement {
           // skapa radio-knappar data.alternatives[alt]
           let input = document.createElement('input')
           let text = document.createTextNode(data.alternatives[alt])
-          console.log(data.alternatives[alt])
 
           input.setAttribute('type', 'radio')
           input.setAttribute('name', 'answer')
           input.setAttribute('value', alt)
-          input.after(text) // fungerar inte. Ska visa en textnod efter inputtaggen...?
+          input.appendChild(text) // fungerar inte. Ska visa en textnod efter inputtaggen...?
           
           this._fieldset.insertBefore(input, submit)
         }
       } else {
+        // om det existerar radio knappar här ta bort dem och ersätt med en vanlig input
+       
+        if (radioButtons.length > 0) {
+          radioButtons.forEach((btn => {
+            console.log(btn)
+            this._fieldset.removeChild(btn)
+          }))
+          
+          let input = document.createElement('input')
+          let submit = this._fieldset.querySelector('input[type="submit"]')
+
+          input.setAttribute('type', 'text')
+          input.setAttribute('name', 'answer')
+          
+          this._fieldset.insertBefore(input, submit)
+        }
+        // console.log(radioButtons.length)
+        // console.log(radioButtons[0])
+
+
         // visa den vanliga rutan igen
-        let input = this._fieldset.querySelector('input')
+        // let input = this._fieldset.querySelectorAll('input')
+        // for (let i = 0; i < input.length - 1; i++) {
+        //   input[i].parentNode.removeChild(input[i])
+        // }
+
+        // let newInput = document.createElement('input')
+        // newInput.setAttribute('type', 'text')
+        // newInput.setAttribute('name', 'answer')
         
       } 
     })
