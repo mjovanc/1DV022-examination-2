@@ -2,8 +2,12 @@ import * as Time from './Time.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
-<form id="question" class="form-group">
-  <h3></h3>
+<form id="question">
+  <h3 id="title"></h3>
+  <fieldset>
+    <input type="text" name="answer">
+    <input type="submit" name="submit">
+  </fieldset>
 </form>
 `
 
@@ -13,6 +17,7 @@ export class Quiz extends window.HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this.questionForm = this.shadowRoot.querySelector('#question')
+    this._fieldset = this.shadowRoot.querySelector('fieldset')
     this._questionID = 1
   }
 
@@ -21,8 +26,7 @@ export class Quiz extends window.HTMLElement {
     
     this.questionForm.addEventListener('submit', (event) => {
       event.preventDefault()
-
-      let answer = event.target.answer.value
+      console.log(event.target.answer.value)
 
       window.fetch(`http://vhost3.lnu.se:20080/answer/${this._questionID}`, {
         method: 'POST',
@@ -30,7 +34,7 @@ export class Quiz extends window.HTMLElement {
           'Accept': 'application/json, text/plain',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify( {answer: answer} )
+        body: JSON.stringify( {answer: event.target.answer.value} ) // behöver vi ändra svaret här beroende på vilken typ av input?
       })
       .then((res) => res.json())
       .then((data) => {
@@ -49,55 +53,33 @@ export class Quiz extends window.HTMLElement {
     .then((res) => res.json())
     .then((data) => {
       this.questionForm.firstElementChild.textContent = data.question
+      // ska rensa input fälten här, skapas ändå nedan.
 
       if (data.alternatives) {
-        let inputAnswer = this.questionForm.querySelector('#input-answer')
-        let submitAnswer = this.questionForm.querySelector('#submit-answer')
-        this.questionForm.removeChild(inputAnswer)
-        this.questionForm.removeChild(submitAnswer)
-        // console.log(inputAnswer)
-
-        let fieldset = document.createElement('fieldset')
-        this.questionForm.appendChild(fieldset)
+        // få fram radio knappar i templaten
+        let firstInput = this._fieldset.querySelector('input')
+        this._fieldset.removeChild(firstInput)
+        let submit = this._fieldset.querySelector('input[type="submit"]')
 
         for (let alt in data.alternatives) {
-          this.createAltButton(data.alternatives[alt], fieldset)
+          // skapa radio-knappar data.alternatives[alt]
+          let input = document.createElement('input')
+          let text = document.createTextNode(data.alternatives[alt])
+          console.log(data.alternatives[alt])
+
+          input.setAttribute('type', 'radio')
+          input.setAttribute('name', 'answer')
+          input.setAttribute('value', alt)
+          input.after(text) // fungerar inte. Ska visa en textnod efter inputtaggen...?
+          
+          this._fieldset.insertBefore(input, submit)
         }
       } else {
-        // skapa en vanlig inmatnings ruta (input)
-        this.createRegularInput()
-      }
-      let submit = document.createElement('input')
-      
-      submit.setAttribute('id', 'submit-answer')
-      submit.setAttribute('type', 'submit')
-      submit.setAttribute('value', 'Svara')
-      
-      this.questionForm.appendChild(submit)
+        // visa den vanliga rutan igen
+        let input = this._fieldset.querySelector('input')
+        
+      } 
     })
-  }
-
-  createRegularInput () {
-    let input = document.createElement('input')
-
-    input.setAttribute('id', 'input-answer')
-    input.setAttribute('type', 'text')
-    input.setAttribute('name', 'answer')
-
-    this.questionForm.appendChild(input)
-  }
-
-  createAltButton (alternative, fieldset) {
-    let input = document.createElement('input')
-    let newText = document.createTextNode(alternative)
-
-    input.setAttribute('id', 'input-answer')
-    input.setAttribute('type', 'radio')
-    input.setAttribute('name', 'choice')
-    input.setAttribute('value', alternative)
-    
-    fieldset.appendChild(input)
-    fieldset.appendChild(newText)
   }
 
 }
