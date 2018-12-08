@@ -3702,3 +3702,9 @@ a.text-error:visited {
 .div-border-bottom {
   border-bottom: 1px solid #eee;
 }
+
+.centered-div {
+  margin: 30px auto;
+  margin-left: auto;
+  margin-right:auto;
+}

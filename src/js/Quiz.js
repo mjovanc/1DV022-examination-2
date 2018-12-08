@@ -1,10 +1,15 @@
-import * as Time from './Time.js'
+import Time from './Time.js'
+import Player from './Player.js'
+import * as utils from './utils.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
   #question {
 
+  }
+  fieldset {
+    border: 0;
   }
   label {
     display: block;
@@ -34,6 +39,15 @@ template.innerHTML = `
     font-size: 1.3em;
   }
 </style>
+
+<form id="nickname">
+  <legend>Enter your nickname</legend>
+  <fieldset>
+    <input type="text" name="nickname">
+    <input type="submit" name="submit">
+  </fieldset>
+</form>
+
 <form id="question">
   <legend></legend>
   <fieldset>
@@ -57,7 +71,9 @@ export class Quiz extends window.HTMLElement {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
+    this._nicknameForm = this.shadowRoot.querySelector('#nickname')
     this.questionForm = this.shadowRoot.querySelector('#question')
+    this.questionForm.hidden = true
     this._fieldset = this.shadowRoot.querySelector('fieldset')
     this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
     this._quizEnd.hidden = true
@@ -66,11 +82,22 @@ export class Quiz extends window.HTMLElement {
 
   connectedCallback () {
     this.getQuestion(this._questionID)
+
+    this._nicknameForm.addEventListener('submit', (event) => {
+      event.preventDefault()
+
+      let nickname = event.target.nickname.value
+
+      let player = new Player(nickname)
+
+      console.log(player.getNickname())
+
+    })
     
     this.questionForm.addEventListener('submit', (event) => {
       event.preventDefault()
-      console.log(event.target.answer.value)
 
+      // make check here for inputs in uppercase so that v8 is V8 also
       let answer = event.target.answer.value
 
       window.fetch(`http://vhost3.lnu.se:20080/answer/${this._questionID}`, {
@@ -100,40 +127,22 @@ export class Quiz extends window.HTMLElement {
     this._questionID = url.substring(url.lastIndexOf('/') + 1)
   }
 
-  removeElements (list, selector) {
-    list.forEach((label => {
-      selector.removeChild(label)
-    }))
-  }
-
-  removeElement (element, selector) {
-    let firstInput = selector.querySelector(element)
-    selector.removeChild(firstInput)
-  }
-
   getQuestion (id) {
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
     .then((data) => {
       this.questionForm.firstElementChild.textContent = data.question
-      // ska rensa input fälten här, skapas ändå nedan.
+
       let radioButtons = this._fieldset.querySelectorAll('[type="radio"]')
       let labels = this._fieldset.querySelectorAll('label')
 
       if (data.alternatives) {
-        console.log(data.alternatives)
-        // Vid näst sista frågan så kommer två gånger på rad data.alternatives
-        // är en bugg att den inte skapar upp då alternativ.
-        // Skapa en if sats för att kolla om föregående fråga innehöll alternativ
-        // debugger
         try {
-          this.removeElement('input', this._fieldset) // tar bort elementet från selector
-          this.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
+          utils.removeElement('input', this._fieldset) // tar bort elementet från selector
+          utils.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
         } catch (e) {
-          this.removeElements(labels, this._fieldset)
-          // console.log('couldnt remove')
+          utils.removeElements(labels, this._fieldset)
         }
-        
         
         let submit = this._fieldset.querySelector('input[type="submit"]')
 
@@ -156,7 +165,7 @@ export class Quiz extends window.HTMLElement {
         // om det existerar radio knappar här ta bort dem och ersätt med en vanlig input
        
         if (radioButtons.length > 0) {
-          this.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
+          utils.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
           
           let input = document.createElement('input')
           let submit = this._fieldset.querySelector('input[type="submit"]')
