@@ -1,4 +1,4 @@
-import Time from './Time.js'
+// import Time from './Time.js'
 import Player from './Player.js'
 import * as utils from './utils.js'
 
@@ -72,6 +72,7 @@ export class Quiz extends window.HTMLElement {
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this._nicknameForm = this.shadowRoot.querySelector('#nickname')
+    this.player = undefined
     this.questionForm = this.shadowRoot.querySelector('#question')
     this.questionForm.hidden = true
     this._fieldset = this.shadowRoot.querySelector('fieldset')
@@ -83,15 +84,12 @@ export class Quiz extends window.HTMLElement {
   connectedCallback () {
     this.getQuestion(this._questionID)
 
+    // Creating the player object
     this._nicknameForm.addEventListener('submit', (event) => {
       event.preventDefault()
 
       let nickname = event.target.nickname.value
-
-      let player = new Player(nickname)
-
-      console.log(player.getNickname())
-
+      this.player = new Player(nickname)
     })
     
     this.questionForm.addEventListener('submit', (event) => {
