@@ -2,6 +2,33 @@ import * as Time from './Time.js'
 
 const template = document.createElement('template')
 template.innerHTML = `
+<style>
+  #question {
+
+  }
+  legend {
+    font-size: 1.5em;
+  }
+  input[type=text] {
+    display: block;
+    margin: 10px 10px 10px 0px;
+    padding: 10px; 
+    border: 1px solid #ededed; 
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    font-size: 1.3em;
+  }
+  input[type="submit" i] {
+    display: block;
+    padding: 10px 25px;
+    border: 0 none;
+    cursor: pointer;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    border: 1px solid #ededed; 
+    font-size: 1.3em;
+  }
+</style>
 <form id="question">
   <legend></legend>
   <fieldset>
@@ -18,7 +45,7 @@ export class Quiz extends window.HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this.questionForm = this.shadowRoot.querySelector('#question')
     this._fieldset = this.shadowRoot.querySelector('fieldset')
-    this._questionID = 326
+    this._questionID = 1
   }
 
   connectedCallback () {
@@ -28,22 +55,24 @@ export class Quiz extends window.HTMLElement {
       event.preventDefault()
       console.log(event.target.answer.value)
 
+      let answer = event.target.answer.value
+
       window.fetch(`http://vhost3.lnu.se:20080/answer/${this._questionID}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json, text/plain',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify( {answer: event.target.answer.value} ) // behöver vi ändra svaret här beroende på vilken typ av input?
+        body: JSON.stringify( {answer: answer } ) // behöver vi ändra svaret här beroende på vilken typ av input?
       })
       .then((res) => res.json())
       .then((data) => {
         console.log(data)
-        if (data.question) {
+        if (data.nextURL) {
           this.updateQuestionID(data.nextURL)
           this.getQuestion(this._questionID)
         } else {
-          // avsluta quiz här
+          console.log('Quiz is over!')
         }
       })
     })
@@ -82,7 +111,7 @@ export class Quiz extends window.HTMLElement {
           input.setAttribute('type', 'radio')
           input.setAttribute('name', 'answer')
           input.setAttribute('value', alt)
-          label.appendChild(text)// fungerar inte. Ska visa en textnod efter inputtaggen...?
+          label.appendChild(text)
           
           this._fieldset.insertBefore(input, submit)
           this._fieldset.insertBefore(label, input)
@@ -107,22 +136,13 @@ export class Quiz extends window.HTMLElement {
           
           this._fieldset.insertBefore(input, submit)
         }
-        // console.log(radioButtons.length)
-        // console.log(radioButtons[0])
-
-
-        // visa den vanliga rutan igen
-        // let input = this._fieldset.querySelectorAll('input')
-        // for (let i = 0; i < input.length - 1; i++) {
-        //   input[i].parentNode.removeChild(input[i])
-        // }
-
-        // let newInput = document.createElement('input')
-        // newInput.setAttribute('type', 'text')
-        // newInput.setAttribute('name', 'answer')
         
       } 
     })
+  }
+
+  updateRendering () {
+    
   }
 
 }
