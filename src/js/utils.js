@@ -8,3 +8,7 @@ export function removeElement (element, selector) {
   let firstInput = selector.querySelector(element)
   selector.removeChild(firstInput)
 }
+
+export function populateStorage (player) {
+  window.localStorage.setItem('player', JSON.stringify(player))
+}

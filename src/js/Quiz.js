@@ -57,8 +57,8 @@ template.innerHTML = `
 </form>
 
 <div id="quiz-end">
-  <h2>You answered all the questions correctly!</h2>
-  
+  <h2></h2>
+
   <h3>Top list</h3>
   <ul>
     <li>Marcus 1:50:02 seconds</li>
@@ -71,11 +71,15 @@ export class Quiz extends window.HTMLElement {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
+    
     this._nicknameForm = this.shadowRoot.querySelector('#nickname')
-    this.player = undefined
+    this._nicknameFieldset = this._nicknameForm.querySelector('fieldset')
+
     this.questionForm = this.shadowRoot.querySelector('#question')
+    this._questionFieldset = this.questionForm.querySelector('fieldset')
     this.questionForm.hidden = true
-    this._fieldset = this.shadowRoot.querySelector('fieldset')
+    
+    this.player = undefined
     this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
     this._quizEnd.hidden = true
     this._questionID = 1
@@ -88,13 +92,22 @@ export class Quiz extends window.HTMLElement {
     this._nicknameForm.addEventListener('submit', (event) => {
       event.preventDefault()
 
-      let nickname = event.target.nickname.value
-      this.player = new Player(nickname)
+      try {
+        let nickname = event.target.nickname.value
+        let player = new Player(nickname)
+        this.player = player
+        // player.totalTime = 20 // så kan vi lägga till tiden såhär
+        utils.populateStorage(player)
+       
+        event.target.hidden = true
+        this.questionForm.hidden = false
+      } catch (e) {
+        console.error('Error!')
+      }
     })
     
     this.questionForm.addEventListener('submit', (event) => {
       event.preventDefault()
-
       // make check here for inputs in uppercase so that v8 is V8 also
       let answer = event.target.answer.value
 
@@ -121,6 +134,14 @@ export class Quiz extends window.HTMLElement {
     })
   }
 
+  lostQuiz () {
+
+  }
+
+  wonQuiz (player, time) {
+    return this._highScores.push(player)
+  }
+
   updateQuestionID (url) {
     this._questionID = url.substring(url.lastIndexOf('/') + 1)
   }
@@ -131,18 +152,18 @@ export class Quiz extends window.HTMLElement {
     .then((data) => {
       this.questionForm.firstElementChild.textContent = data.question
 
-      let radioButtons = this._fieldset.querySelectorAll('[type="radio"]')
-      let labels = this._fieldset.querySelectorAll('label')
+      let radioButtons = this._questionFieldset.querySelectorAll('[type="radio"]')
+      let labels = this._questionFieldset.querySelectorAll('label')
 
       if (data.alternatives) {
         try {
-          utils.removeElement('input', this._fieldset) // tar bort elementet från selector
-          utils.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
+          utils.removeElement('input', this._questionFieldset) // tar bort elementet från selector
+          utils.removeElements(labels, this._questionFieldset) // tar bort alla labels och inputs
         } catch (e) {
-          utils.removeElements(labels, this._fieldset)
+          utils.removeElements(labels, this._questionFieldset)
         }
         
-        let submit = this._fieldset.querySelector('input[type="submit"]')
+        let submit = this._questionFieldset.querySelector('input[type="submit"]')
 
         // Creating radio input buttons here
         for (let alt in data.alternatives) {
@@ -154,7 +175,7 @@ export class Quiz extends window.HTMLElement {
           input.setAttribute('name', 'answer')
           input.setAttribute('value', alt)
           
-          this._fieldset.insertBefore(label, submit)
+          this._questionFieldset.insertBefore(label, submit)
           label.appendChild(input)
           label.appendChild(text)
         }
@@ -163,16 +184,20 @@ export class Quiz extends window.HTMLElement {
         // om det existerar radio knappar här ta bort dem och ersätt med en vanlig input
        
         if (radioButtons.length > 0) {
-          utils.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
+          utils.removeElements(labels, this._questionFieldset) // tar bort alla labels och inputs
           
           let input = document.createElement('input')
-          let submit = this._fieldset.querySelector('input[type="submit"]')
+          let submit = this._questionFieldset.querySelector('input[type="submit"]')
 
           input.setAttribute('type', 'text')
           input.setAttribute('name', 'answer')
           
-          this._fieldset.insertBefore(input, submit)
+          this._questionFieldset.insertBefore(input, submit)
         }
+
+        this.player.totalTime = 20
+        
+        console.log(this.player)
         
       } 
     })
