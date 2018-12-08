@@ -89,9 +89,9 @@ export class Quiz extends window.HTMLElement {
     this._nicknameForm = this.shadowRoot.querySelector('#nickname')
     this._nicknameFieldset = this._nicknameForm.querySelector('fieldset')
 
-    this.questionForm = this.shadowRoot.querySelector('#question')
-    this._questionFieldset = this.questionForm.querySelector('fieldset')
-    this.questionForm.hidden = true
+    this._questionForm = this.shadowRoot.querySelector('#question')
+    this._questionFieldset = this._questionForm.querySelector('fieldset')
+    this._questionForm.hidden = true
     
     this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
     this._quizEnd.hidden = true
@@ -111,14 +111,14 @@ export class Quiz extends window.HTMLElement {
         this.player = player
        
         event.target.hidden = true
-        this.questionForm.hidden = false
+        this._questionForm.hidden = false
       } catch (e) {
         console.error('Error!')
       }
 
     })
     
-    this.questionForm.addEventListener('submit', (event) => {
+    this._questionForm.addEventListener('submit', (event) => {
       event.preventDefault()
       // make check here for inputs in uppercase so that v8 is V8 also
       let answer = event.target.answer.value
@@ -146,7 +146,7 @@ export class Quiz extends window.HTMLElement {
           window.localStorage.setItem(key, JSON.stringify(playerData)) // populate when player has answered all questions with time
 
           console.log('Quiz is over!')
-          this.questionForm.hidden = true
+          this._questionForm.hidden = true
           this._quizEnd.hidden = false
 
           this.presentHighScores()
@@ -171,9 +171,8 @@ export class Quiz extends window.HTMLElement {
     })
     let newArr = sortPlayers.slice(0, 5)
 
-    // Here we will loop through the dom ul and insert LI elements with the top 5
+    // Creating the table elements
     let table = this._quizEnd.querySelector('table')
-
     newArr.forEach(function (p) {
       let tr = document.createElement('tr')
       let td1 = document.createElement('td')
@@ -191,8 +190,6 @@ export class Quiz extends window.HTMLElement {
     let aTag = this._quizEnd.querySelector('a')
     const url = location.protocol + '//' + location.host + '/'
     aTag.setAttribute('href', url)
-
-    console.log(newArr)
   }
 
   updateQuestionID (url) {
@@ -203,7 +200,7 @@ export class Quiz extends window.HTMLElement {
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
     .then((data) => {
-      this.questionForm.firstElementChild.textContent = data.question
+      this._questionForm.firstElementChild.textContent = data.question
 
       let radioButtons = this._questionFieldset.querySelectorAll('[type="radio"]')
       let labels = this._questionFieldset.querySelectorAll('label')
