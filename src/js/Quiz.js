@@ -55,10 +55,18 @@ export class Quiz extends window.HTMLElement {
       this.questionForm.firstElementChild.textContent = data.question
       // ska rensa input fälten här, skapas ändå nedan.
       let radioButtons = this._fieldset.querySelectorAll('[type="radio"]')
+      let labels = this._fieldset.querySelectorAll('label')
 
       if (data.alternatives) {
         // få fram radio knappar i templaten
         let firstInput = this._fieldset.querySelector('input')
+
+        if (labels.length > 0) {
+          labels.forEach((label => {
+            this._fieldset.removeChild(label)
+          }))
+        } 
+
         this._fieldset.removeChild(firstInput)
         let submit = this._fieldset.querySelector('input[type="submit"]')
 
@@ -81,7 +89,6 @@ export class Quiz extends window.HTMLElement {
        
         if (radioButtons.length > 0) {
           radioButtons.forEach((btn => {
-            console.log(btn)
             this._fieldset.removeChild(btn)
           }))
           
