@@ -3,7 +3,7 @@ import * as Time from './Time.js'
 const template = document.createElement('template')
 template.innerHTML = `
 <form id="question">
-  <h3 id="title"></h3>
+  <legend></legend>
   <fieldset>
     <input type="text" name="answer">
     <input type="submit" name="submit">
@@ -65,14 +65,16 @@ export class Quiz extends window.HTMLElement {
         for (let alt in data.alternatives) {
           // skapa radio-knappar data.alternatives[alt]
           let input = document.createElement('input')
+          let label = document.createElement('label')
           let text = document.createTextNode(data.alternatives[alt])
 
           input.setAttribute('type', 'radio')
           input.setAttribute('name', 'answer')
           input.setAttribute('value', alt)
-          input.appendChild(text) // fungerar inte. Ska visa en textnod efter inputtaggen...?
+          label.appendChild(text)// fungerar inte. Ska visa en textnod efter inputtaggen...?
           
           this._fieldset.insertBefore(input, submit)
+          this._fieldset.insertBefore(label, input)
         }
       } else {
         // om det existerar radio knappar här ta bort dem och ersätt med en vanlig input
