@@ -38,6 +38,16 @@ template.innerHTML = `
     border: 1px solid #ededed; 
     font-size: 1.3em;
   }
+  table {
+    margin: 0 10px 25px 0;
+    width: 100%;
+  }
+  table th {
+    text-align: left;
+  }
+  #quiz-end a {
+
+  }
 </style>
 
 <form id="nickname">
@@ -60,9 +70,12 @@ template.innerHTML = `
   <h2></h2>
 
   <h3>Top list</h3>
-  <ul>
-    <li>Marcus 1:50:02 seconds</li>
-  <ul>
+  <table>
+    <tr>
+      <th scope="col">Player</th>
+      <th scope="col">Time</th>
+    </tr>
+  </table>
   <a href="#">Play the Quiz again?</a>
 </div>
 `
@@ -157,6 +170,23 @@ export class Quiz extends window.HTMLElement {
       return a.totalTime - b.totalTime;
     })
     let newArr = sortPlayers.slice(0, 5)
+
+    // Here we will loop through the dom ul and insert LI elements with the top 5
+    let table = this._quizEnd.querySelector('table')
+
+    newArr.forEach(function (p) {
+      let tr = document.createElement('tr')
+      let td1 = document.createElement('td')
+      let td2 = document.createElement('td')
+      let nickname = document.createTextNode(p.nickname)
+      let totalTime = document.createTextNode(p.totalTime)
+
+      table.appendChild(tr)
+      tr.appendChild(td1)
+      tr.appendChild(td2)
+      td1.appendChild(nickname)
+      td2.appendChild(totalTime)
+    })
 
     let aTag = this._quizEnd.querySelector('a')
     const url = location.protocol + '//' + location.host + '/'
