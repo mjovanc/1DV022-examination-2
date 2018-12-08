@@ -6,6 +6,10 @@ template.innerHTML = `
   #question {
 
   }
+  label {
+    display: block;
+    margin: 5px 5px 5px 0;
+  }
   legend {
     font-size: 1.5em;
   }
@@ -19,6 +23,7 @@ template.innerHTML = `
     font-size: 1.3em;
   }
   input[type="submit" i] {
+    margin: 20px 10px 10px 0;
     display: block;
     padding: 10px 25px;
     border: 0 none;
@@ -100,6 +105,7 @@ export class Quiz extends window.HTMLElement {
         }))
 
         this._fieldset.removeChild(firstInput)
+        
         let submit = this._fieldset.querySelector('input[type="submit"]')
 
         for (let alt in data.alternatives) {
@@ -111,18 +117,15 @@ export class Quiz extends window.HTMLElement {
           input.setAttribute('type', 'radio')
           input.setAttribute('name', 'answer')
           input.setAttribute('value', alt)
-          label.appendChild(text)
           
-          this._fieldset.insertBefore(input, submit)
-          this._fieldset.insertBefore(label, input)
+          this._fieldset.insertBefore(label, submit)
+          label.appendChild(input)
+          label.appendChild(text)
         }
       } else {
         // om det existerar radio knappar här ta bort dem och ersätt med en vanlig input
        
         if (radioButtons.length > 0) {
-          radioButtons.forEach((btn => {
-            this._fieldset.removeChild(btn)
-          }))
 
           labels.forEach((label => {
             this._fieldset.removeChild(label)
@@ -139,10 +142,6 @@ export class Quiz extends window.HTMLElement {
         
       } 
     })
-  }
-
-  updateRendering () {
-    
   }
 
 }
