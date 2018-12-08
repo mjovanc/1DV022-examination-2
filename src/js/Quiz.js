@@ -41,6 +41,15 @@ template.innerHTML = `
     <input type="submit" name="submit">
   </fieldset>
 </form>
+
+<div id="quiz-end">
+  <h2>You answered all the questions correctly!</h2>
+  
+  <h3>Top list</h3>
+  <ul>
+    <li>Marcus 1:50:02 seconds</li>
+  <ul>
+</div>
 `
 
 export class Quiz extends window.HTMLElement {
@@ -50,6 +59,8 @@ export class Quiz extends window.HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this.questionForm = this.shadowRoot.querySelector('#question')
     this._fieldset = this.shadowRoot.querySelector('fieldset')
+    this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
+    this._quizEnd.hidden = true
     this._questionID = 1
   }
 
@@ -78,6 +89,8 @@ export class Quiz extends window.HTMLElement {
           this.getQuestion(this._questionID)
         } else {
           console.log('Quiz is over!')
+          this.questionForm.hidden = true
+          this._quizEnd.hidden = false
         }
       })
     })
