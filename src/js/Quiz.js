@@ -87,6 +87,17 @@ export class Quiz extends window.HTMLElement {
     this._questionID = url.substring(url.lastIndexOf('/') + 1)
   }
 
+  removeElements (list, selector) {
+    list.forEach((label => {
+      selector.removeChild(label)
+    }))
+  }
+
+  removeElement (element, selector) {
+    let firstInput = selector.querySelector(element)
+    selector.removeChild(firstInput)
+  }
+
   getQuestion (id) {
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
@@ -97,19 +108,24 @@ export class Quiz extends window.HTMLElement {
       let labels = this._fieldset.querySelectorAll('label')
 
       if (data.alternatives) {
-        // få fram radio knappar i templaten
-        let firstInput = this._fieldset.querySelector('input')
-
-        labels.forEach((label => {
-          this._fieldset.removeChild(label)
-        }))
-
-        this._fieldset.removeChild(firstInput)
+        console.log(data.alternatives)
+        // Vid näst sista frågan så kommer två gånger på rad data.alternatives
+        // är en bugg att den inte skapar upp då alternativ.
+        // Skapa en if sats för att kolla om föregående fråga innehöll alternativ
+        // debugger
+        try {
+          this.removeElement('input', this._fieldset) // tar bort elementet från selector
+          this.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
+        } catch (e) {
+          this.removeElements(labels, this._fieldset)
+          // console.log('couldnt remove')
+        }
+        
         
         let submit = this._fieldset.querySelector('input[type="submit"]')
 
+        // Creating radio input buttons here
         for (let alt in data.alternatives) {
-          // skapa radio-knappar data.alternatives[alt]
           let input = document.createElement('input')
           let label = document.createElement('label')
           let text = document.createTextNode(data.alternatives[alt])
@@ -123,13 +139,11 @@ export class Quiz extends window.HTMLElement {
           label.appendChild(text)
         }
       } else {
+        // om det inte finns alternativ 
         // om det existerar radio knappar här ta bort dem och ersätt med en vanlig input
        
         if (radioButtons.length > 0) {
-
-          labels.forEach((label => {
-            this._fieldset.removeChild(label)
-          }))
+          this.removeElements(labels, this._fieldset) // tar bort alla labels och inputs
           
           let input = document.createElement('input')
           let submit = this._fieldset.querySelector('input[type="submit"]')
