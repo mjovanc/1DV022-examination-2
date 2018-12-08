@@ -63,6 +63,7 @@ template.innerHTML = `
   <ul>
     <li>Marcus 1:50:02 seconds</li>
   <ul>
+  <a href="#">Play the Quiz again?</a>
 </div>
 `
 
@@ -79,15 +80,14 @@ export class Quiz extends window.HTMLElement {
     this._questionFieldset = this.questionForm.querySelector('fieldset')
     this.questionForm.hidden = true
     
-    this.player = undefined
     this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
     this._quizEnd.hidden = true
     this._questionID = 1
+    this.player = undefined
   }
 
   connectedCallback () {
     this.getQuestion(this._questionID)
-
     // Creating the player object
     this._nicknameForm.addEventListener('submit', (event) => {
       event.preventDefault()
@@ -96,14 +96,13 @@ export class Quiz extends window.HTMLElement {
         let nickname = event.target.nickname.value
         let player = new Player(nickname)
         this.player = player
-        // player.totalTime = 20 // så kan vi lägga till tiden såhär
-        utils.populateStorage(player)
        
         event.target.hidden = true
         this.questionForm.hidden = false
       } catch (e) {
         console.error('Error!')
       }
+
     })
     
     this.questionForm.addEventListener('submit', (event) => {
@@ -121,14 +120,23 @@ export class Quiz extends window.HTMLElement {
       })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data)
         if (data.nextURL) {
           this.updateQuestionID(data.nextURL)
           this.getQuestion(this._questionID)
         } else {
+          let playerData = {
+            'nickname': this.player.nickname,
+            'totalTime': this.player.totalTime
+          }
+  
+          let key = 'player' + window.localStorage.length
+          window.localStorage.setItem(key, JSON.stringify(playerData)) // populate when player has answered all questions with time
+
           console.log('Quiz is over!')
           this.questionForm.hidden = true
           this._quizEnd.hidden = false
+
+          this.presentHighScores()
         }
       })
     })
@@ -138,8 +146,23 @@ export class Quiz extends window.HTMLElement {
 
   }
 
-  wonQuiz (player, time) {
-    return this._highScores.push(player)
+  presentHighScores () {
+    let players = []
+    for (let i = 0; i < localStorage.length; i++) {
+      let p = JSON.parse(localStorage.getItem(localStorage.key(i)))
+      players.push(p)
+    }
+
+    let sortPlayers = players.sort(function (a, b) {
+      return a.totalTime - b.totalTime;
+    })
+    let newArr = sortPlayers.slice(0, 5)
+
+    let aTag = this._quizEnd.querySelector('a')
+    const url = location.protocol + '//' + location.host + '/'
+    aTag.setAttribute('href', url)
+
+    console.log(newArr)
   }
 
   updateQuestionID (url) {
@@ -180,9 +203,6 @@ export class Quiz extends window.HTMLElement {
           label.appendChild(text)
         }
       } else {
-        // om det inte finns alternativ 
-        // om det existerar radio knappar här ta bort dem och ersätt med en vanlig input
-       
         if (radioButtons.length > 0) {
           utils.removeElements(labels, this._questionFieldset) // tar bort alla labels och inputs
           
@@ -194,11 +214,6 @@ export class Quiz extends window.HTMLElement {
           
           this._questionFieldset.insertBefore(input, submit)
         }
-
-        this.player.totalTime = 20
-        
-        console.log(this.player)
-        
       } 
     })
   }

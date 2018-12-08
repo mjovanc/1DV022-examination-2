@@ -9,6 +9,11 @@ export function removeElement (element, selector) {
   selector.removeChild(firstInput)
 }
 
-export function populateStorage (player) {
-  window.localStorage.setItem('player', JSON.stringify(player))
+export function populatePlayerToStorage (players) {
+  window.localStorage.setItem('players', JSON.stringify(players))
 }
+
+// export function getPlayerFromStorage (player) {
+//   let p = window.localStorage.getItem('player')
+//   return JSON.parse(p)
+// }

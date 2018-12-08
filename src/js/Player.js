@@ -1,6 +1,6 @@
 export default class Player {
   constructor (nickname) {
     this.nickname = nickname
-    this.totalTime = undefined
+    this.totalTime = 0
   }
 }
