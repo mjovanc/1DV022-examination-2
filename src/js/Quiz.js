@@ -18,7 +18,7 @@ export class Quiz extends window.HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true))
     this.questionForm = this.shadowRoot.querySelector('#question')
     this._fieldset = this.shadowRoot.querySelector('fieldset')
-    this._questionID = 1
+    this._questionID = 326
   }
 
   connectedCallback () {
@@ -38,8 +38,13 @@ export class Quiz extends window.HTMLElement {
       })
       .then((res) => res.json())
       .then((data) => {
-        this.updateQuestionID(data.nextURL)
-        this.getQuestion(this._questionID)
+        console.log(data)
+        if (data.question) {
+          this.updateQuestionID(data.nextURL)
+          this.getQuestion(this._questionID)
+        } else {
+          // avsluta quiz här
+        }
       })
     })
   }
@@ -61,11 +66,9 @@ export class Quiz extends window.HTMLElement {
         // få fram radio knappar i templaten
         let firstInput = this._fieldset.querySelector('input')
 
-        if (labels.length > 0) {
-          labels.forEach((label => {
-            this._fieldset.removeChild(label)
-          }))
-        } 
+        labels.forEach((label => {
+          this._fieldset.removeChild(label)
+        }))
 
         this._fieldset.removeChild(firstInput)
         let submit = this._fieldset.querySelector('input[type="submit"]')
@@ -90,6 +93,10 @@ export class Quiz extends window.HTMLElement {
         if (radioButtons.length > 0) {
           radioButtons.forEach((btn => {
             this._fieldset.removeChild(btn)
+          }))
+
+          labels.forEach((label => {
+            this._fieldset.removeChild(label)
           }))
           
           let input = document.createElement('input')
