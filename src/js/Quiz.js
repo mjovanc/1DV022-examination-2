@@ -216,7 +216,7 @@ export class Quiz extends window.HTMLElement {
 
   newTime () {
     let span = this._questionForm.querySelector('#time-left')
-    let time = new Time(span)
+    let time = new Time(span, this.player)
     this.time = time
   }
 

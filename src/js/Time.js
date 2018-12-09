@@ -1,6 +1,7 @@
 export default class Time {
-  constructor (element) {
+  constructor (element, player) {
     this.element = element
+    this.player = player
     this.totalTime = 0
     this.stop = false
   }
@@ -9,7 +10,7 @@ export default class Time {
     let sec = 20
     let timer = setInterval(() => {
       if (this.stop) {
-        this.totalTime += sec
+        this.player.totalTime += sec
         clearInterval(timer)
       } else {
         this.element.innerHTML = sec + ' seconds left.'
