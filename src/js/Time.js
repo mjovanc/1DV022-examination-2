@@ -1,4 +1,4 @@
-class Time {
+export default class Time {
   constructor () {
     this.startTime = new Date().getTime()
     this.totalQuestionTime = 20

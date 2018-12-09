@@ -1,4 +1,4 @@
-// import Time from './Time.js'
+import Time from './Time.js'
 import Player from './Player.js'
 import * as utils from './utils.js'
 
@@ -97,6 +97,7 @@ export class Quiz extends window.HTMLElement {
     this._quizEnd.hidden = true
     this._questionID = 1
     this.player = undefined
+    this.url = location.protocol + '//' + location.host + '/'
   }
 
   connectedCallback () {
@@ -115,7 +116,6 @@ export class Quiz extends window.HTMLElement {
       } catch (e) {
         console.error('Error!')
       }
-
     })
     
     this._questionForm.addEventListener('submit', (event) => {
@@ -131,35 +131,51 @@ export class Quiz extends window.HTMLElement {
         },
         body: JSON.stringify( {answer: answer } ) // behöver vi ändra svaret här beroende på vilken typ av input?
       })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.nextURL) {
-          this.updateQuestionID(data.nextURL)
-          this.getQuestion(this._questionID)
+      .then((res) => {
+        if (res.ok) {
+          return res.json()
+
+          .then((data) => {
+            if (data.nextURL) {
+              this.updateQuestionID(data.nextURL)
+              this.getQuestion(this._questionID)
+            } else {
+              let playerData = {
+                'nickname': this.player.nickname,
+                'totalTime': this.player.totalTime
+              }
+      
+              let key = 'player' + window.localStorage.length
+              window.localStorage.setItem(key, JSON.stringify(playerData)) // populate when player has answered all questions with time
+
+              console.log('Quiz is over!')
+              this._questionForm.hidden = true
+
+              this.presentHighScores()
+            }
+          })
         } else {
-          let playerData = {
-            'nickname': this.player.nickname,
-            'totalTime': this.player.totalTime
-          }
-  
-          let key = 'player' + window.localStorage.length
-          window.localStorage.setItem(key, JSON.stringify(playerData)) // populate when player has answered all questions with time
-
-          console.log('Quiz is over!')
-          this._questionForm.hidden = true
-          this._quizEnd.hidden = false
-
           this.presentHighScores()
+          this.lostQuiz()
         }
       })
+      
     })
   }
 
   lostQuiz () {
+    this._questionForm.hidden = true
+    let url = this.url
 
+    setTimeout(function () {
+      window.location.replace(url)
+    }, 5000)
+    console.log('You lost...')
   }
 
   presentHighScores () {
+    this._quizEnd.hidden = false
+
     let players = []
     for (let i = 0; i < localStorage.length; i++) {
       let p = JSON.parse(localStorage.getItem(localStorage.key(i)))
@@ -188,8 +204,7 @@ export class Quiz extends window.HTMLElement {
     })
 
     let aTag = this._quizEnd.querySelector('a')
-    const url = location.protocol + '//' + location.host + '/'
-    aTag.setAttribute('href', url)
+    aTag.setAttribute('href', this.url)
   }
 
   updateQuestionID (url) {
