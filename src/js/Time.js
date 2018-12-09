@@ -1,15 +1,20 @@
 export default class Time {
-  constructor (player) {
-    this.player = player
-    this.startTime = new Date().getTime()
-    this.totalQuestionTime = 20
+  constructor (element) {
+    this._totalQuestionTime = 20
+    this._counter = 0
+    this._timer = undefined
+    this._element = element
   }
 
   countDown () {
-    let currentTime = new Date().getTime()
-    let diff = currentTime - this.startTime
-    let seconds = this.totalQuestionTime - Math.floor(diff / 1000)
-    
-    return seconds
+    this._timer = setInterval(() => {
+      if (this._counter < this._totalQuestionTime) {
+        this._counter++
+        this._element.innerHTML = (this._totalQuestionTime - this._counter ) + ' seconds left.'
+      } else {
+        clearTimeout(this._timer)
+      }
+    }, 1000)
   }
+
 }

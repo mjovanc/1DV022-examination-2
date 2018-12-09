@@ -1,5 +1,5 @@
 /**
- * Removing DOM elements
+ * Removing DOM elements // måste fixa param här nedan
  * 
  * @param {NodeList} list
  * @param {NodeList} selector
@@ -11,7 +11,7 @@ export function removeElements (list, selector) {
 }
 
 /**
- * Removing a DOM element
+ * Removing a DOM element // måste fixa param här nedan
  * 
  * @param {NodeList} element
  * @param {NodeList} selector

@@ -50,6 +50,17 @@ template.innerHTML = `
   table th {
     text-align: left;
   }
+  #quiz-end a {
+    margin: 20px 10px 10px 0;
+    display: block;
+    padding: 10px 25px;
+    border: 0 none;
+    cursor: pointer;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    border: 1px solid #ededed; 
+    font-size: 1.3em;
+  }
 </style>
 
 <form id="nickname">
@@ -66,6 +77,7 @@ template.innerHTML = `
     <input type="text" name="answer">
     <input type="submit" name="submit">
   </fieldset>
+  <span id="time-left"></span>
 </form>
 
 <div id="quiz-end">
@@ -119,7 +131,7 @@ export class Quiz extends window.HTMLElement {
    * @memberof Quiz
    */
   connectedCallback () {
-    this.getQuestion(this._questionID)
+
     // Creating the player object
     this._nicknameForm.addEventListener('submit', (event) => {
       event.preventDefault()
@@ -128,15 +140,16 @@ export class Quiz extends window.HTMLElement {
         let nickname = event.target.nickname.value
         let player = new Player(nickname)
         this.player = player
-       
+
         event.target.hidden = true
         this._questionForm.hidden = false
+        this.getQuestion(this._questionID)
       } catch (e) {
         console.error('Error!')
       }
     })
     
-    this._questionForm.addEventListener('submit', (event) => {
+    this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
       // make check here for inputs in uppercase so that v8 is V8 also
       let answer = event.target.answer.value
@@ -193,7 +206,7 @@ export class Quiz extends window.HTMLElement {
     this._questionForm.hidden = true
     let url = this.url
 
-    setTimeout(function () {
+    setTimeout(() => {
       window.location.replace(url)
     }, 5000)
   }
@@ -213,7 +226,7 @@ export class Quiz extends window.HTMLElement {
     }
 
     let sortPlayers = players.sort(function (a, b) {
-      return a.totalTime - b.totalTime;
+      return a.totalTime - b.totalTime
     })
     let newArr = sortPlayers.slice(0, 5)
 
@@ -253,7 +266,7 @@ export class Quiz extends window.HTMLElement {
    * @memberof Quiz
    * @param {Number} id 
    */
-  getQuestion (id) {
+  async getQuestion (id) {
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
     .then((data) => {
@@ -261,6 +274,11 @@ export class Quiz extends window.HTMLElement {
 
       let radioButtons = this._questionFieldset.querySelectorAll('[type="radio"]')
       let labels = this._questionFieldset.querySelectorAll('label')
+      let span = this._questionForm.querySelector('#time-left')
+
+      console.log(span)
+      let time = new Time(span)
+      time.countDown()
 
       if (data.alternatives) {
         try {
