@@ -6,7 +6,6 @@
  * @version 1.0
  */
 
-import Time from './Time.js'
 import Player from './Player.js'
 import * as utils from './utils.js'
 
@@ -154,6 +153,11 @@ export class Quiz extends window.HTMLElement {
     
     this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
+
+       let span = this._questionForm.querySelector('#time-left')
+      this.countDown(span)
+      // Add the time to the player object here. It runs inside function getQuestion()
+
       // make check here for inputs in uppercase so that v8 is V8 also
       let answer = event.target.answer.value
 
@@ -277,7 +281,6 @@ export class Quiz extends window.HTMLElement {
 
       let radioButtons = this._questionFieldset.querySelectorAll('[type="radio"]')
       let labels = this._questionFieldset.querySelectorAll('label')
-      let span = this._questionForm.querySelector('#time-left')
 
       if (data.alternatives) {
         try {
@@ -322,6 +325,25 @@ export class Quiz extends window.HTMLElement {
       // this.lostQuiz()
 
     })
+  }
+
+  countDown (element) {
+    let totalQuestionTime = 21
+    let counter = 1
+    let timeLeft = 0
+    let timer = undefined
+
+    timer = setInterval(() => {
+      if (counter < totalQuestionTime) {
+        counter++
+        timeLeft = totalQuestionTime - counter
+        element.innerHTML = (timeLeft) + ' seconds left.'
+        
+        return timeLeft
+      } else {
+        clearTimeout(this._timer)
+      }
+    }, 1000)
   }
 
 }
