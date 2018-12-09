@@ -121,7 +121,10 @@ export class Quiz extends window.HTMLElement {
     this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
     this._quizEnd.hidden = true
     this._questionID = 1
+    
     this.player = undefined
+    this.playerTime = 0
+    
     this.url = location.protocol + '//' + location.host + '/'
   }
 
@@ -276,10 +279,6 @@ export class Quiz extends window.HTMLElement {
       let labels = this._questionFieldset.querySelectorAll('label')
       let span = this._questionForm.querySelector('#time-left')
 
-      console.log(span)
-      let time = new Time(span)
-      time.countDown()
-
       if (data.alternatives) {
         try {
           utils.removeElement('input', this._questionFieldset) // tar bort elementet från selector
@@ -316,7 +315,12 @@ export class Quiz extends window.HTMLElement {
           
           this._questionFieldset.insertBefore(input, submit)
         }
-      } 
+      }
+
+      // this._questionForm.hidden = true
+      // this.presentHighScores()
+      // this.lostQuiz()
+
     })
   }
 
