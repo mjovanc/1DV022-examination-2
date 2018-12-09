@@ -122,7 +122,8 @@ export class Quiz extends window.HTMLElement {
     this._questionID = 1
     
     this.player = undefined
-    this.playerTime = 0
+    this.playerTime = undefined
+    this.timeLeft = undefined
     
     this.url = location.protocol + '//' + location.host + '/'
   }
@@ -145,17 +146,26 @@ export class Quiz extends window.HTMLElement {
 
         event.target.hidden = true
         this._questionForm.hidden = false
+
         this.getQuestion(this._questionID)
+        // let timer = undefined
+        // timer = setTimeout(() => {
+          
+        // }, 2000)
       } catch (e) {
         console.error('Error!')
       }
     })
-    
+
     this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
 
-       let span = this._questionForm.querySelector('#time-left')
-      this.countDown(span)
+      let timer = undefined
+      timer = setTimeout(() => {
+        this._questionForm.hidden = true
+        this.presentHighScores()
+        this.lostQuiz()
+      }, 20000)
       // Add the time to the player object here. It runs inside function getQuestion()
 
       // make check here for inputs in uppercase so that v8 is V8 also
@@ -273,7 +283,7 @@ export class Quiz extends window.HTMLElement {
    * @memberof Quiz
    * @param {Number} id 
    */
-  async getQuestion (id) {
+  async getQuestion (id) {    
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
     .then((data) => {
@@ -320,28 +330,25 @@ export class Quiz extends window.HTMLElement {
         }
       }
 
-      // this._questionForm.hidden = true
-      // this.presentHighScores()
-      // this.lostQuiz()
+      this.countDown()
 
     })
   }
 
-  countDown (element) {
+  countDown () {
+    let span = this._questionForm.querySelector('#time-left')
+
     let totalQuestionTime = 21
     let counter = 1
-    let timeLeft = 0
     let timer = undefined
 
     timer = setInterval(() => {
       if (counter < totalQuestionTime) {
         counter++
-        timeLeft = totalQuestionTime - counter
-        element.innerHTML = (timeLeft) + ' seconds left.'
-        
-        return timeLeft
+        this.timeLeft = totalQuestionTime - counter
+        span.innerHTML = (this.timeLeft) + ' seconds left.'
       } else {
-        clearTimeout(this._timer)
+        clearTimeout(timer)
       }
     }, 1000)
   }
