@@ -196,10 +196,8 @@ export class Quiz extends window.HTMLElement {
     setTimeout(function () {
       window.location.replace(url)
     }, 5000)
-    console.log('You lost...')
   }
-
-
+  
   /**
    * Presenting the top five players by time.
    * 

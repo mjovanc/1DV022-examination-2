@@ -1,5 +1,6 @@
 export default class Time {
-  constructor () {
+  constructor (player) {
+    this.player = player
     this.startTime = new Date().getTime()
     this.totalQuestionTime = 20
   }
