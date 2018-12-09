@@ -6,6 +6,7 @@
  * @version 1.0
  */
 
+import Time from './Time.js'
 import Player from './Player.js'
 import * as utils from './utils.js'
 
@@ -116,14 +117,14 @@ export class Quiz extends window.HTMLElement {
     this._questionForm = this.shadowRoot.querySelector('#question')
     this._questionFieldset = this._questionForm.querySelector('fieldset')
     this._questionForm.hidden = true
+    this._questionID = 1
     
     this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
     this._quizEnd.hidden = true
-    this._questionID = 1
     
     this.player = undefined
-    this.playerTime = undefined
-    this.timeLeft = undefined
+    this.totalTime = 20000
+    this.time = undefined
     
     this.url = location.protocol + '//' + location.host + '/'
   }
@@ -148,27 +149,30 @@ export class Quiz extends window.HTMLElement {
         this._questionForm.hidden = false
 
         this.getQuestion(this._questionID)
-        // let timer = undefined
-        // timer = setTimeout(() => {
-          
-        // }, 2000)
+
+        // let timer = setTimeout(() => {
+        //   this._questionForm.hidden = true
+        //   window.location.replace(this.url)
+        // }, this.totalTime)
+
+        this.newTime()
+        this.time.timer()
+
       } catch (e) {
-        console.error('Error!')
+        console.error('Error: ' + e)
       }
     })
 
     this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
+      
+      this.time.stop = true // stoppar tiden
 
-      let timer = undefined
-      timer = setTimeout(() => {
-        this._questionForm.hidden = true
-        this.presentHighScores()
-        this.lostQuiz()
-      }, 20000)
-      // Add the time to the player object here. It runs inside function getQuestion()
+      // let timer = setTimeout(() => {
+      //   this._questionForm.hidden = true
+      //   window.location.replace(this.url)
+      // }, this.totalTime)
 
-      // make check here for inputs in uppercase so that v8 is V8 also
       let answer = event.target.answer.value
 
       window.fetch(`http://vhost3.lnu.se:20080/answer/${this._questionID}`, {
@@ -177,27 +181,28 @@ export class Quiz extends window.HTMLElement {
           'Accept': 'application/json, text/plain',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify( {answer: answer } ) // behöver vi ändra svaret här beroende på vilken typ av input?
+        body: JSON.stringify( {answer: answer } )
       })
       .then((res) => {
         if (res.ok) {
-          return res.json()
-
+          res.json()
+          
           .then((data) => {
             if (data.nextURL) {
               this.updateQuestionID(data.nextURL)
               this.getQuestion(this._questionID)
+              this.newTime()
+              this.time.timer()
             } else {
               let playerData = {
                 'nickname': this.player.nickname,
                 'totalTime': this.player.totalTime
               }
-      
               let key = 'player' + window.localStorage.length
               window.localStorage.setItem(key, JSON.stringify(playerData))
 
-              this._questionForm.hidden = true
               this.presentHighScores()
+              console.log(this.time.totalTime)
             }
           })
         } else {
@@ -207,6 +212,12 @@ export class Quiz extends window.HTMLElement {
       })
       
     })
+  }
+
+  newTime () {
+    let span = this._questionForm.querySelector('#time-left')
+    let time = new Time(span)
+    this.time = time
   }
 
   /**
@@ -220,11 +231,8 @@ export class Quiz extends window.HTMLElement {
     let text = document.createTextNode('You lost the game! You will be redirected to the start again.')
     h2.appendChild(text)
 
-    this._questionForm.hidden = true
-    let url = this.url
-
     setTimeout(() => {
-      window.location.replace(url)
+      window.location.replace(this.url)
     }, 5000)
   }
   
@@ -234,6 +242,7 @@ export class Quiz extends window.HTMLElement {
    * @memberof Quiz
    */
   presentHighScores () {
+    this._questionForm.hidden = true
     this._quizEnd.hidden = false
 
     let players = []
@@ -287,20 +296,22 @@ export class Quiz extends window.HTMLElement {
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
     .then((data) => {
+      let questionFieldset = this._questionFieldset
+
       this._questionForm.firstElementChild.textContent = data.question
 
-      let radioButtons = this._questionFieldset.querySelectorAll('[type="radio"]')
-      let labels = this._questionFieldset.querySelectorAll('label')
+      let radioButtons = questionFieldset.querySelectorAll('[type="radio"]')
+      let labels = questionFieldset.querySelectorAll('label')
 
       if (data.alternatives) {
         try {
-          utils.removeElement('input', this._questionFieldset) // tar bort elementet från selector
-          utils.removeElements(labels, this._questionFieldset) // tar bort alla labels och inputs
+          utils.removeElement('input', questionFieldset) // tar bort elementet från selector
+          utils.removeElements(labels, questionFieldset) // tar bort alla labels och inputs
         } catch (e) {
-          utils.removeElements(labels, this._questionFieldset)
+          utils.removeElements(labels, questionFieldset)
         }
         
-        let submit = this._questionFieldset.querySelector('input[type="submit"]')
+        let submit = questionFieldset.querySelector('input[type="submit"]')
 
         // Creating radio input buttons here
         for (let alt in data.alternatives) {
@@ -312,45 +323,24 @@ export class Quiz extends window.HTMLElement {
           input.setAttribute('name', 'answer')
           input.setAttribute('value', alt)
           
-          this._questionFieldset.insertBefore(label, submit)
+          questionFieldset.insertBefore(label, submit)
           label.appendChild(input)
           label.appendChild(text)
         }
       } else {
         if (radioButtons.length > 0) {
-          utils.removeElements(labels, this._questionFieldset) // tar bort alla labels och inputs
+          utils.removeElements(labels, questionFieldset) // tar bort alla labels och inputs
           
           let input = document.createElement('input')
-          let submit = this._questionFieldset.querySelector('input[type="submit"]')
+          let submit = questionFieldset.querySelector('input[type="submit"]')
 
           input.setAttribute('type', 'text')
           input.setAttribute('name', 'answer')
           
-          this._questionFieldset.insertBefore(input, submit)
+          questionFieldset.insertBefore(input, submit)
         }
       }
-
-      this.countDown()
-
     })
-  }
-
-  countDown () {
-    let span = this._questionForm.querySelector('#time-left')
-
-    let totalQuestionTime = 21
-    let counter = 1
-    let timer = undefined
-
-    timer = setInterval(() => {
-      if (counter < totalQuestionTime) {
-        counter++
-        this.timeLeft = totalQuestionTime - counter
-        span.innerHTML = (this.timeLeft) + ' seconds left.'
-      } else {
-        clearTimeout(timer)
-      }
-    }, 1000)
   }
 
 }

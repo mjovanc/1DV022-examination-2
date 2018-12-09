@@ -1,0 +1,23 @@
+export default class Time {
+  constructor (element) {
+    this.element = element
+    this.totalTime = 0
+    this.stop = false
+  }
+
+  timer () {
+    let sec = 20
+    let timer = setInterval(() => {
+      if (this.stop) {
+        this.totalTime += sec
+        clearInterval(timer)
+      } else {
+        this.element.innerHTML = sec + ' seconds left.'
+        sec--
+        if (sec < 0) {
+          clearInterval(timer)
+        }
+      }
+    }, 1000)
+  }
+}
