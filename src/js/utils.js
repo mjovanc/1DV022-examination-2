@@ -1,3 +1,8 @@
+/**
+ * Removing DOM elements
+ * @param {NodeList} list
+ * @param {Element} selector
+ */
 export function removeElements (list, selector) {
   list.forEach((label => {
     selector.removeChild(label)

@@ -1,3 +1,11 @@
+/**
+ * Quiz module.
+ *
+ * @module src/js/Quiz
+ * @author Marcus Cvjeticanin
+ * @version 1.0
+ */
+
 import Time from './Time.js'
 import Player from './Player.js'
 import * as utils from './utils.js'
@@ -5,9 +13,6 @@ import * as utils from './utils.js'
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
-  #question {
-
-  }
   fieldset {
     border: 0;
   }
@@ -45,9 +50,6 @@ template.innerHTML = `
   table th {
     text-align: left;
   }
-  #quiz-end a {
-
-  }
 </style>
 
 <form id="nickname">
@@ -80,7 +82,18 @@ template.innerHTML = `
 </div>
 `
 
+/**
+ * A Quiz element that lets a player answer to a series of questions.
+ *
+ * @class Quiz
+ * @extends {window.HTMLElement}
+ */
 export class Quiz extends window.HTMLElement {
+  /**
+   * Creates an instance of Quiz.
+   * 
+   * @memberof Quiz
+   */
   constructor () {
     super()
     this.attachShadow({ mode: 'open' })
@@ -100,6 +113,11 @@ export class Quiz extends window.HTMLElement {
     this.url = location.protocol + '//' + location.host + '/'
   }
 
+  /**
+   * Called when connected to the DOM
+   * 
+   * @memberof Quiz
+   */
   connectedCallback () {
     this.getQuestion(this._questionID)
     // Creating the player object
@@ -146,11 +164,9 @@ export class Quiz extends window.HTMLElement {
               }
       
               let key = 'player' + window.localStorage.length
-              window.localStorage.setItem(key, JSON.stringify(playerData)) // populate when player has answered all questions with time
+              window.localStorage.setItem(key, JSON.stringify(playerData))
 
-              console.log('Quiz is over!')
               this._questionForm.hidden = true
-
               this.presentHighScores()
             }
           })
@@ -163,7 +179,17 @@ export class Quiz extends window.HTMLElement {
     })
   }
 
+  /**
+   * Displaying a message that the player has lost.
+   * Redirecting the player to the start page.
+   * 
+   * @memberof Quiz
+   */
   lostQuiz () {
+    let h2 = this._quizEnd.querySelector('h2')
+    let text = document.createTextNode('You lost the game! You will be redirected to the start again.')
+    h2.appendChild(text)
+
     this._questionForm.hidden = true
     let url = this.url
 
@@ -173,6 +199,12 @@ export class Quiz extends window.HTMLElement {
     console.log('You lost...')
   }
 
+
+  /**
+   * Presenting the top five players by time.
+   * 
+   * @memberof Quiz
+   */
   presentHighScores () {
     this._quizEnd.hidden = false
 
@@ -207,10 +239,22 @@ export class Quiz extends window.HTMLElement {
     aTag.setAttribute('href', this.url)
   }
 
+  /**
+   * Updating the question ID of given URL
+   * 
+   * @memberof Quiz
+   * @param {String} url
+   */
   updateQuestionID (url) {
     this._questionID = url.substring(url.lastIndexOf('/') + 1)
   }
 
+  /**
+   * Getting a question by the given id and presenting it on the page.
+   * 
+   * @memberof Quiz
+   * @param {Number} id 
+   */
   getQuestion (id) {
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
