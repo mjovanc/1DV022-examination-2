@@ -1,4 +1,25 @@
+/**
+ * Time module.
+ *
+ * @module src/js/Time
+ * @author Marcus Cvjeticanin
+ * @version 1.0
+ */
+
+/**
+ * A Time object
+ *
+ * @class Time
+ */
 export default class Time {
+  /**
+   * Creates an instance of Quiz.
+   * 
+   * @param {Object} element
+   * @param {Object} player
+   * @param {String} url
+   * @memberof Time
+   */
   constructor (element, player, url) {
     this.element = element
     this.player = player
@@ -6,6 +27,10 @@ export default class Time {
     this.stop = false
   }
 
+  /**
+   * Displays a timer and calculates the totalTime
+   * to the player object.
+   */
   timer () {
     let sec = 20
     

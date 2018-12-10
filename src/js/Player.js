@@ -6,8 +6,9 @@
  * @version 1.0
  */
 
- /**
+/**
  * Class representing a player.
+ * @class Player
  */
 export default class Player {
   /**

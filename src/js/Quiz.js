@@ -110,23 +110,17 @@ export class Quiz extends window.HTMLElement {
     super()
     this.attachShadow({ mode: 'open' })
     this.shadowRoot.appendChild(template.content.cloneNode(true))
-    
     this._nicknameForm = this.shadowRoot.querySelector('#nickname')
     this._nicknameFieldset = this._nicknameForm.querySelector('fieldset')
-
     this._questionForm = this.shadowRoot.querySelector('#question')
     this._questionFieldset = this._questionForm.querySelector('fieldset')
     this._questionForm.hidden = true
     this._questionID = 1
-    
     this._quizEnd = this.shadowRoot.querySelector('#quiz-end')
     this._quizEnd.hidden = true
-    
-    this.player = undefined
-    this.totalTime = 20000
-    this.time = undefined
-    
-    this.url = location.protocol + '//' + location.host + '/'
+    this._player = undefined
+    this._time = undefined
+    this._url = location.protocol + '//' + location.host + '/'
   }
 
   /**
@@ -143,15 +137,15 @@ export class Quiz extends window.HTMLElement {
       try {
         let nickname = event.target.nickname.value
         let player = new Player(nickname)
-        this.player = player
+        this._player = player
 
         event.target.hidden = true
         this._questionForm.hidden = false
 
-        this.getQuestion(this._questionID)
+        this._getQuestion(this._questionID)
 
-        this.newTime()
-        this.time.timer()
+        this._newTime()
+        this._time.timer()
       } catch (e) {
         console.error('Error: ' + e)
       }
@@ -160,7 +154,7 @@ export class Quiz extends window.HTMLElement {
     this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
       
-      this.time.stop = true // stoppar tiden
+      this._time.stop = true // stoppar tiden
 
       let answer = event.target.answer.value
 
@@ -178,35 +172,40 @@ export class Quiz extends window.HTMLElement {
           
           .then((data) => {
             if (data.nextURL) {
-              this.updateQuestionID(data.nextURL)
-              this.getQuestion(this._questionID)
+              this._updateQuestionID(data.nextURL)
+              this._getQuestion(this._questionID)
               
-              this.newTime()
-              this.time.timer()
+              this._newTime()
+              this._time.timer()
             } else {
               let playerData = {
-                'nickname': this.player.nickname,
-                'totalTime': this.player.totalTime
+                'nickname': this._player.nickname,
+                'totalTime': this._player.totalTime
               }
               let key = 'player' + window.localStorage.length
               window.localStorage.setItem(key, JSON.stringify(playerData))
 
-              this.presentHighScores()
+              this._presentHighScores()
             }
           })
         } else {
-          this.presentHighScores()
-          this.lostQuiz()
+          this._presentHighScores()
+          this._lostQuiz()
         }
       })
       
     })
   }
 
-  newTime () {
+  /**
+   * Creating an instance of Time
+   * 
+   * @memberof Quiz
+   */
+  _newTime () {
     let span = this._questionForm.querySelector('#time-left')
-    let time = new Time(span, this.player, this.url)
-    this.time = time
+    let time = new Time(span, this._player, this._url)
+    this._time = time
   }
 
   /**
@@ -215,13 +214,13 @@ export class Quiz extends window.HTMLElement {
    * 
    * @memberof Quiz
    */
-  lostQuiz () {
+  _lostQuiz () {
     let h2 = this._quizEnd.querySelector('h2')
     let text = document.createTextNode('You lost the game! You will be redirected to the start again.')
     h2.appendChild(text)
 
     setTimeout(() => {
-      window.location.replace(this.url)
+      window.location.replace(this._url)
     }, 5000)
   }
   
@@ -230,7 +229,7 @@ export class Quiz extends window.HTMLElement {
    * 
    * @memberof Quiz
    */
-  presentHighScores () {
+  _presentHighScores () {
     this._questionForm.hidden = true
     this._quizEnd.hidden = false
 
@@ -262,7 +261,7 @@ export class Quiz extends window.HTMLElement {
     })
 
     let aTag = this._quizEnd.querySelector('a')
-    aTag.setAttribute('href', this.url)
+    aTag.setAttribute('href', this._url)
   }
 
   /**
@@ -271,7 +270,7 @@ export class Quiz extends window.HTMLElement {
    * @memberof Quiz
    * @param {String} url
    */
-  updateQuestionID (url) {
+  _updateQuestionID (url) {
     this._questionID = url.substring(url.lastIndexOf('/') + 1)
   }
 
@@ -281,7 +280,7 @@ export class Quiz extends window.HTMLElement {
    * @memberof Quiz
    * @param {Number} id 
    */
-  async getQuestion (id) {    
+  async _getQuestion (id) {    
     window.fetch(`http://vhost3.lnu.se:20080/question/${id}`)
     .then((res) => res.json())
     .then((data) => {
