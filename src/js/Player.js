@@ -18,9 +18,4 @@ export default class Player {
     this.nickname = nickname
     this.totalTime = 0
   }
-
-  getTotalTime () {
-    let minAndSec = this.totalTime / 60
-
-  }
 }

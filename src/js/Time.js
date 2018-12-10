@@ -8,9 +8,10 @@ export default class Time {
 
   timer () {
     let sec = 20
+    
     let timer = setInterval(() => {
       if (this.stop) {
-        this.player.totalTime += sec
+        this.player.totalTime += (20 - sec)
         clearInterval(timer)
       } else {
         this.element.innerHTML = sec + ' seconds left.'

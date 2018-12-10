@@ -202,7 +202,6 @@ export class Quiz extends window.HTMLElement {
               window.localStorage.setItem(key, JSON.stringify(playerData))
 
               this.presentHighScores()
-              console.log(this.time.totalTime)
             }
           })
         } else {
@@ -263,7 +262,8 @@ export class Quiz extends window.HTMLElement {
       let td1 = document.createElement('td')
       let td2 = document.createElement('td')
       let nickname = document.createTextNode(p.nickname)
-      let totalTime = document.createTextNode(p.totalTime)
+      let fancyTime = utils.fancyTime(p)
+      let totalTime = document.createTextNode(fancyTime)
 
       table.appendChild(tr)
       tr.appendChild(td1)
