@@ -3,7 +3,7 @@
  *
  * @module src/js/Quiz
  * @author Marcus Cvjeticanin
- * @version 1.0
+ * @version 1.1
  */
 
 import Time from './Time.js'
