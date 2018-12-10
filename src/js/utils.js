@@ -1,7 +1,15 @@
 /**
- * Removing DOM elements // måste fixa param här nedan
+ * Utils module.
+ *
+ * @module src/js/utils
+ * @author Marcus Cvjeticanin
+ * @version 1.0
+ */
+
+/**
+ * Removing all children in a DOM element
  * 
- * @param {NodeList} list
+ * @param {HTMLElement} list
  * @param {NodeList} selector
  */
 export function removeElements (list, selector) {
@@ -11,9 +19,9 @@ export function removeElements (list, selector) {
 }
 
 /**
- * Removing a DOM element // måste fixa param här nedan
+ * Removing the first child element in a DOM element
  * 
- * @param {NodeList} element
+ * @param {HTMLElement} element
  * @param {NodeList} selector
  */
 export function removeElement (element, selector) {
@@ -22,7 +30,7 @@ export function removeElement (element, selector) {
 }
 
 /**
- * Displays time in minutes and seconds
+ * Displays player total time in minutes and seconds
  * 
  * @param {Object} player 
  * @returns {String}

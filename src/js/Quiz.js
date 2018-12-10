@@ -13,6 +13,9 @@ import * as utils from './utils.js'
 const template = document.createElement('template')
 template.innerHTML = `
 <style>
+  form {
+    padding-bottom: 15px;
+  }
   fieldset {
     border: 0;
   }
@@ -22,6 +25,7 @@ template.innerHTML = `
   }
   legend {
     font-size: 1.5em;
+    margin-left: 12px;
   }
   input[type=text] {
     display: block;
@@ -31,6 +35,10 @@ template.innerHTML = `
     -webkit-border-radius: 2px;
     border-radius: 2px;
     font-size: 1.3em;
+    width: 92%;
+  }
+  input[type=radio] {
+    margin-right: 8px;
   }
   input[type="submit" i] {
     margin: 20px 10px 10px 0;
@@ -50,6 +58,9 @@ template.innerHTML = `
   table th {
     text-align: left;
   }
+  #quiz-end {
+    padding: 15px;
+  }
   #quiz-end a {
     margin: 20px 10px 10px 0;
     display: block;
@@ -60,6 +71,9 @@ template.innerHTML = `
     border-radius: 2px;
     border: 1px solid #ededed; 
     font-size: 1.3em;
+  }
+  #time-left {
+    padding-left: 10px;
   }
 </style>
 
@@ -130,7 +144,7 @@ export class Quiz extends window.HTMLElement {
    */
   connectedCallback () {
 
-    // Creating the player object
+    // Creating the player object when submitting the form
     this._nicknameForm.addEventListener('submit', (event) => {
       event.preventDefault()
 
@@ -149,12 +163,14 @@ export class Quiz extends window.HTMLElement {
       } catch (e) {
         console.error('Error: ' + e)
       }
+      
+      // Solution to remove event listener in an anonymous function: https://stackoverflow.com/a/11511956/10746336
+      this.removeEventListener('submit', arguments.callee)
     })
 
     this._questionForm.addEventListener('submit', async event => {
       event.preventDefault()
-      
-      this._time.stop = true // stoppar tiden
+      this._time.stop = true
 
       let answer = event.target.answer.value
 
@@ -186,6 +202,7 @@ export class Quiz extends window.HTMLElement {
               window.localStorage.setItem(key, JSON.stringify(playerData))
 
               this._presentHighScores()
+              this.removeEventListener('submit', arguments.callee)
             }
           })
         } else {
@@ -198,7 +215,8 @@ export class Quiz extends window.HTMLElement {
   }
 
   /**
-   * Creating an instance of Time
+   * Creating an instance of the Time object
+   * and inserting it in the span element.
    * 
    * @memberof Quiz
    */
@@ -291,10 +309,11 @@ export class Quiz extends window.HTMLElement {
       let radioButtons = questionFieldset.querySelectorAll('[type="radio"]')
       let labels = questionFieldset.querySelectorAll('label')
 
+      // If the question has alternatives
       if (data.alternatives) {
         try {
-          utils.removeElement('input', questionFieldset) // tar bort elementet från selector
-          utils.removeElements(labels, questionFieldset) // tar bort alla labels och inputs
+          utils.removeElement('input', questionFieldset) 
+          utils.removeElements(labels, questionFieldset)
         } catch (e) {
           utils.removeElements(labels, questionFieldset)
         }
@@ -317,7 +336,7 @@ export class Quiz extends window.HTMLElement {
         }
       } else {
         if (radioButtons.length > 0) {
-          utils.removeElements(labels, questionFieldset) // tar bort alla labels och inputs
+          utils.removeElements(labels, questionFieldset)
           
           let input = document.createElement('input')
           let submit = questionFieldset.querySelector('input[type="submit"]')

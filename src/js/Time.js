@@ -39,7 +39,7 @@ export default class Time {
         this.player.totalTime += (20 - sec)
         clearInterval(timer)
       } else {
-        this.element.innerHTML = sec + ' seconds left.'
+        this.element.innerHTML = sec + ' seconds left'
         sec--
         if (sec < 0) {
           clearInterval(timer)
