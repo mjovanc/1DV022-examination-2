@@ -1,8 +1,8 @@
 export default class Time {
-  constructor (element, player) {
+  constructor (element, player, url) {
     this.element = element
     this.player = player
-    this.totalTime = 0
+    this.url = url
     this.stop = false
   }
 
@@ -18,6 +18,7 @@ export default class Time {
         sec--
         if (sec < 0) {
           clearInterval(timer)
+          window.location.replace(this.url)
         }
       }
     }, 1000)

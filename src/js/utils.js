@@ -31,5 +31,5 @@ export function fancyTime (player) {
   let minutes = Math.floor(player.totalTime / 60)
   let seconds = player.totalTime - minutes * 60
     
-  return `${minutes} minutes and ${seconds} seconds`
+  return `${minutes} minutes, ${seconds} seconds`
 }

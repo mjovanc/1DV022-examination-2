@@ -150,14 +150,8 @@ export class Quiz extends window.HTMLElement {
 
         this.getQuestion(this._questionID)
 
-        // let timer = setTimeout(() => {
-        //   this._questionForm.hidden = true
-        //   window.location.replace(this.url)
-        // }, this.totalTime)
-
         this.newTime()
         this.time.timer()
-
       } catch (e) {
         console.error('Error: ' + e)
       }
@@ -167,11 +161,6 @@ export class Quiz extends window.HTMLElement {
       event.preventDefault()
       
       this.time.stop = true // stoppar tiden
-
-      // let timer = setTimeout(() => {
-      //   this._questionForm.hidden = true
-      //   window.location.replace(this.url)
-      // }, this.totalTime)
 
       let answer = event.target.answer.value
 
@@ -191,6 +180,7 @@ export class Quiz extends window.HTMLElement {
             if (data.nextURL) {
               this.updateQuestionID(data.nextURL)
               this.getQuestion(this._questionID)
+              
               this.newTime()
               this.time.timer()
             } else {
@@ -215,7 +205,7 @@ export class Quiz extends window.HTMLElement {
 
   newTime () {
     let span = this._questionForm.querySelector('#time-left')
-    let time = new Time(span, this.player)
+    let time = new Time(span, this.player, this.url)
     this.time = time
   }
 
@@ -262,8 +252,7 @@ export class Quiz extends window.HTMLElement {
       let td1 = document.createElement('td')
       let td2 = document.createElement('td')
       let nickname = document.createTextNode(p.nickname)
-      let fancyTime = utils.fancyTime(p)
-      let totalTime = document.createTextNode(fancyTime)
+      let totalTime = document.createTextNode(utils.fancyTime(p))
 
       table.appendChild(tr)
       tr.appendChild(td1)
